@@ -1,5 +1,61 @@
 'use strict';
 
+function getMarkerPos(keyword, content) {
+  if (keyword === "" || content === "") {
+    return [];
+  }
+
+  const res = content.split(/\r\n|\n/).reduce((pre, text, i) => {
+    let start = 0;
+
+    while (true) {
+      const index = text.indexOf(keyword, start);
+
+      if (index === -1) {
+        break;
+      }
+
+      pre.push({
+        start: {
+          line: i,
+          ch: index,
+        },
+        end: {
+          line: i,
+          ch: index + keyword.length,
+        }
+      });
+
+      start = index + keyword.length;
+    }
+
+    return pre;
+  }, []);
+
+  return res;
+};
+
+function updateMarker(editor, keyword, content) {
+  const removeMarkers = async function() {
+    const beforeMarks = editor.getAllMarks();
+    await beforeMarks.forEach(async (mark) => await mark.clear());
+  };
+
+  const addMarkers = async function() {
+    const newPosPairs = getMarkerPos(keyword, content);
+    newPosPairs.forEach((pos) => {
+      editor.markText(pos.start, pos.end, { className: "CodeMirror-marked" });
+    });
+  };
+
+  const process = async function() {
+    await removeMarkers();
+    await addMarkers();
+  };
+
+  process();
+}
+
 function _extends() {
   _extends = Object.assign || function(target) {
     for (var i = 1; i < arguments.length; i++) {
@@ -560,6 +616,8 @@ var Controlled = function(_super) {
 
     this.shared.applyUserDefined(prevProps, preserved);
     this.appliedUserDefined = true;
+
+    updateMarker(this.editor, this.props.keyword, this.props.value);
   };
 
   Controlled.prototype.componentWillUnmount = function() {

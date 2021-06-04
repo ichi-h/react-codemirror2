@@ -30,6 +30,7 @@ export interface ICodeMirror {
     editorDidConfigure?: (editor: codemirror.Editor) => void;
     editorDidMount?: (editor: codemirror.Editor, value: string, cb: () => void) => void;
     editorWillUnmount?: (lib: any) => void;
+    keyword: string;
     onBlur?: DomEvent;
     onChange?: (editor: codemirror.Editor, data: codemirror.EditorChange, value: string) => void;
     onContextMenu?: DomEvent;
